@@ -1,8 +1,8 @@
-import { PrismaClient, User, Role } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../config/database';
+import { User, Role } from '@prisma/client';
 
 export class AuthRepository {
+    
     async findByEmail(email: string): Promise<User | null> {
         return prisma.user.findUnique({
             where: { email },
@@ -25,6 +25,6 @@ export class AuthRepository {
         await prisma.user.update({
             where: { id: userId },
             data: { updatedAt: new Date() },
-        })
+        });
     }
 }
