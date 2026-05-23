@@ -5,6 +5,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import authRoutes from './routes/authRoutes';
+import residentRoutes from './routes/residentRoutes';
 import prisma from './config/database';   // ← Import from our config
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', residentRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
