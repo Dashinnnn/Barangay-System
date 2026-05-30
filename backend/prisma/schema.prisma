@@ -36,7 +36,7 @@ model Purok {
 }
 
 model Resident {
-  id                String      @id @default(cuid())
+  id                String            @id @default(cuid())
   firstName         String
   middleName        String?
   lastName          String
@@ -49,18 +49,42 @@ model Resident {
   email             String?
 
   purokId           String
-  purok             Purok       @relation(fields: [purokId], references: [id])
+  purok             Purok             @relation(fields: [purokId], references: [id])
+
+  documentRequests  DocumentRequest[]
 
   houseNumber       String?
   street            String?
 
-  voterStatus       Boolean     @default(false)
-  isHouseholdHead   Boolean     @default(false)
+  voterStatus       Boolean           @default(false)
+  isHouseholdHead   Boolean           @default(false)
 
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@map("residents")
+}
+
+model DocumentRequest {
+  id              String         @id @default(cuid())
+  residentId      String
+  resident        Resident       @relation(fields: [residentId], references: [id])
+
+  documentType    DocumentType
+  purpose         String
+  status          RequestStatus  @default(PENDING)
+  
+  requestedAt     DateTime       @default(now())
+  reviewedAt      DateTime?
+  releasedAt      DateTime?
+  
+  reviewedBy      String?
+  notes           String?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("document_requests")
 }
 
 enum Role {
@@ -84,3 +108,18 @@ enum CivilStatus {
   SEPARATED
 }
 
+enum DocumentType {
+  BARANGAY_CLEARANCE
+  CERTIFICATE_OF_INDIGENCY
+  CERTIFICATE_OF_RESIDENCY
+  CERTIFICATE_OF_BIRTH
+  GOOD_MORAL_CHARACTER
+  OTHER
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RELEASED
+}

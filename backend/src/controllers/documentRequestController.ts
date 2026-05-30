@@ -1,88 +1,87 @@
 import { Request, Response } from 'express';
-import { PurokService } from '../services/purokService';
-import { createPurokSchema, updatePurokSchema } from '../validations/purokValidations';
+import { DocumentRequestService } from '../services/documentRequestService';
+import { createDocumentRequestSchema, updateDocumentRequestSchema } from '../validations/documentRequestValidation';
 import { validate } from '../middleware/validate';
 
-export class PurokController { 
-    private purokService = new PurokService();
 
-    create = [ 
-        validate(createPurokSchema),
+export class DocumentRequestController {
+    private docService = new DocumentRequestService();
+
+    create = [
+        validate(createDocumentRequestSchema),
         async (req: Request, res: Response) => {
             try {
-                const purok = await this.purokService.createPurok(req.body);
+                const request = await this.docService.createRequest(req.body);
                 res.status(201).json({
                     success: true,
-                    data: purok
+                    data: request
                 });
             } catch (error: any) {
                 res.status(400).json({
-                    success: false, 
+                    success: false,
                     message: error.message
                 });
             }
         }
-    ];
+    ]
 
-    getAll = async (req: Request, res: Response) => {
+    getAll = async (req: Request, res: Response)  => {
         try {
-            const puroks = await this.purokService.getAllPuroks();
-            res.json({ 
+            const requests = await this.docService.getAllRequests();
+            res.json({
                 success: true,
-                data: puroks
-             });
+                data: requests
+            });
         } catch (error: any) {
             res.status(500).json({
                 success: false,
                 message: error.message
-            });
+            })
         }
     }
 
     getById = async (req: Request, res: Response) => {
-        try {
-            const { id } = req.params;
+        try { 
+            const { id } = req.params
 
-            //Ensue id is a string
-            if (typeof id !== 'string') {
-                res.status(400).json ({
+            //Ensure id is a string
+            if (typeof id !== 'string' || id) {
+                res.status(400).json({
                     success: false,
                     message: 'Invalid ID format'
                 });
                 return;
             }
-            const purok = await this.purokService.getPurokById(id);
-            res.json ({ 
-                success: true, 
-                data: purok 
+            const request = await this.docService.getRequestById(id);
+            res.json ({
+                success: true,
+                data: request
             });
-        } catch (error: any) {
+         } catch (error: any) {;
             res.status(404).json({
                 success: false,
                 message: error.message
             });
-        }
+         }
     }
 
     update = [
-        validate(updatePurokSchema), 
+        validate(updateDocumentRequestSchema),
         async (req: Request, res: Response) => {
             try {
                 const { id } = req.params;
-
                 //Ensure that id is a string
-                if (typeof id !== 'string' || id) {
-                    res.status(400).json({
+                if(typeof id !== 'string' || id) {
+                    res.status(400).json ({
                         success: false,
                         message: 'Invalid ID format'
-                    })
+                    });
                     return;
                 }
-
-                const purok = await this.purokService.updatePurok(id, req.body);
+                const request = await this.docService.updateRequest(id, req.body);
                 res.json({
                     success: true,
-                    data: purok
+                    data: request
                 });
             } catch (error: any) {
                 res.status(400).json({
@@ -91,25 +90,25 @@ export class PurokController {
                 });
             }
         }
-    ] 
+    ]
 
     delete = async (req: Request, res: Response) => {
-        try{
+        try { 
             const { id } = req.params;
+            //Ensure that data is a string
 
-            //Ensure that id is a string
-            if (typeof id !== 'string' || id) {
+            if (typeof id !== 'string' || id ) {
                 res.status(400).json({
                     success: false,
-                    message: 'invalid ID format'  
-                })
-                return
+                    message: 'Invalid ID format'
+                });
+                return;
             }
-             await this.purokService.deletePurok(id);
+             await this.docService.deleteRequest(id);
              res.json({
                 success: true,
-                message: 'Purok deleted successfully'
-             });
+                message: 'Document Request Deleted'
+             })
         } catch (error: any) {
             res.status(400).json({
                 success: false,
@@ -117,4 +116,4 @@ export class PurokController {
             });
         }
     }
- }
+}
