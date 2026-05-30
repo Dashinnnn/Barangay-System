@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url = env("DATABASE_URL")   
 }
 
 model User {
@@ -12,35 +11,54 @@ model User {
   email       String    @unique
   password    String
   firstName   String
-  lastName    String 
+  lastName    String
   role        Role      @default(STAFF)
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Purok {
+  id            String     @id @default(cuid())
+  name          String     @unique
+  description   String?
+  leaderName    String?
+  contactNumber String?
+
+  residents     Resident[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("puroks")
 }
 
 model Resident {
-  id              String    @id @default(cuid())
-  firstName       String
-  middleName      String?
-  lastName        String
-  suffix          String?
-  dateOfBirth     String
-  gender          Gender
-  civilStatus     CivilStatus
-  contactNumber   String?
-  email           String?
+  id                String      @id @default(cuid())
+  firstName         String
+  middleName        String?
+  lastName          String
+  suffix            String?
+  dateOfBirth       DateTime
+  gender            Gender
+  civilStatus       CivilStatus
+  occupation        String?
+  contactNumber     String?
+  email             String?
 
-  //Adress
-  purok           String
-  houseNumber     String?
-  street          String?
+  purokId           String
+  purok             Purok       @relation(fields: [purokId], references: [id])
 
-  voterStatus       Boolean @default(false)
-  isHouseHoldHead   Boolean @default(false)
+  houseNumber       String?
+  street            String?
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  voterStatus       Boolean     @default(false)
+  isHouseholdHead   Boolean     @default(false)
+
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   @@map("residents")
 }
@@ -59,9 +77,10 @@ enum Gender {
 }
 
 enum CivilStatus {
-    SINGLE
-    MARRIED
-    WIDOWED
-    DIVORCED
-    SEPARATED
+  SINGLE
+  MARRIED
+  WIDOWED
+  DIVORCED
+  SEPARATED
 }
+

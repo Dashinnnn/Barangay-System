@@ -6,7 +6,9 @@ import morgan from 'morgan';
 
 import authRoutes from './routes/authRoutes';
 import residentRoutes from './routes/residentRoutes';
+import purokRoutes from './routes/residentRoutes';
 import prisma from './config/database';   // ← Import from our config
+
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', residentRoutes);
+app.use('./api/auth', purokRoutes)
 
 // Test Route
 app.get('/', (req, res) => {
