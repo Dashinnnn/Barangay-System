@@ -7,15 +7,19 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  password    String
-  firstName   String
-  lastName    String
-  role        Role      @default(STAFF)
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                String         @id @default(cuid())
+  email             String         @unique
+  password          String
+  firstName         String
+  lastName          String
+  filedCases        BlotterCase[]   @relation("FiledBy")
+  assignedCases     BlotterCase[]   @relation("AssignedTo")
+  hearingsLed       Hearing[]
+  caseLogs          CaseLog[]
+  role              Role            @default(STAFF)
+  isActive          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   @@map("users")
 }
@@ -53,6 +57,8 @@ model Resident {
 
   documentRequests  DocumentRequest[]
 
+  caseParties       CaseParty[]
+
   houseNumber       String?
   street            String?
 
@@ -85,6 +91,140 @@ model DocumentRequest {
   updatedAt       DateTime       @updatedAt
 
   @@map("document_requests")
+}
+
+model BlotterCase {
+  id                    String            @id @default(cuid())
+  caseNumber            String            @unique
+  title                 String
+  inceidentType         inceidentType
+  status                CaseStatus        @default(FILED)
+  priority              Priority          @default(NORMAL)
+
+  incidentDate          DateTime
+  incidentTime          String?
+  incidentPlace         String
+
+  summary               String            @db.Text
+  remarks               String?           @db.Text
+
+  complaints            CaseParty[]       @relation("Complaints")
+  respondents           CaseParty[]       @relation("Respondents")
+  witnesses             CaseParty[]       @relation("Witnesses")
+
+  hearings              Hearing[]
+  settlemets            Settlement[]
+  documents             BlotterDocument[]
+  logs                  CaseLog[]
+
+  filedById             String
+  filedBy               User               @relation("FiledBy", fields: [filedById], references: [id])
+
+  assignedToId          String? 
+  assignedTo            User?              @relation("AssignedTo", fields: [assignedToId], references: [id])
+
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@map("blotter_cases")
+}
+
+model CaseParty {
+  id                    String              @id @default(cuid())
+  role                  PartyRole
+
+  residentId            String? 
+  resident              Resident?           @relation(fields: [residentId], references: [id])
+
+  firstName             String
+  middleName            String?
+  lastName              String
+  suffix                String?
+  address               String
+  contactNumber         String?
+  age                   Int? 
+  gender                Gender?
+  civilStatus           CivilStatus?
+  occupation            String?
+
+  statement             String?             @db.Text
+
+  complainantCaseId     String?
+  complainantCase       BlotterCase?        @relation("Complaints", fields: [complainantCaseId], references: [id])
+
+  respondentCaseId      String?
+  respondentCase        BlotterCase?        @relation("Respondents", fields: [respondentCaseId], references: [id])
+
+  witnessCaseId         String?
+  winessCase            BlotterCase?        @relation("Witnesses", fields: [witnessCaseId], references: [id])
+
+  createdAt             DateTime            @default(now())
+  
+  @@map("case_parties")
+}
+
+model Hearing {
+  id                    String              @id @default(cuid())
+  caseId                String
+  case                  BlotterCase         @relation(fields: [caseId], references: [id])
+
+  hearingNumber         Int
+  scheduledDate         DateTime
+  actualDate            DateTime?
+  venue                 String?
+  outcome               HearingOutcome?
+  notes                 String?             @db.Text
+
+  conductedById         String
+  conductedBy           User                @relation(fields: [conductedById], references: [id])
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@map(hearings)
+}
+
+modal Settlement {
+  id                    String              @id @default(cuid())
+  caseId                String
+  case                  BlotterCase         @relation(fields: [caseId], references: [id])
+
+  settlemetDate         DateTime
+  type                  SettlementType
+  terms                 String              @db.Text
+  isSigned              Boolean             @default(false)
+
+  createAt              DateTime            @default(now())
+
+  @@map("settlements")
+}
+
+model BlotterDocument {
+  id                    String              @id @default(cuid())
+  caseId                String
+  case BlotterCase                          @relation(fields: [caseId], references: [id])
+
+  type                  BlotterDocumentType
+  fileName              String
+  filePath              String
+
+  uploadedAt            DateTime            @default(now())
+
+  @@map("blotter_documents")
+}
+
+model CaseLog{
+  id                    String              @id @default(cuid())
+  caseId                String
+  case                  BlotterCase         @relation(fields: [caseId], references: [id])
+
+  action                String
+  performedById         String
+  performedBy           User                 @relation(fields: [performedById], refences: [id])
+  performedAt           DateTime             @default(now())
+
+  @@map("case_logs")
 }
 
 enum Role {
@@ -122,4 +262,68 @@ enum RequestStatus {
   APPROVED
   REJECTED
   RELEASED
+}
+
+enum IncidentType {
+  PHYSICAL_INJURY
+  ORAL_DEFAMATION
+  THEFT
+  TRESPASSING
+  NUISANCE
+  PROPERTY_DAMAGE
+  DOMESTIC_DISPUTE
+  NOISE_COMPLAINT
+  DEBT_COLLECTION
+  ESTAFA
+  OTHERS
+}
+
+enum CaseStatus {
+  FILED
+  UNDER_MEDIATION
+  PENDING_HEARING
+  SETTLED
+  UNSETTLED
+  REFERRED_TO_COURT
+  DISMISSED
+  ARCHIVED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum PartyRole {
+  COMPLAINANT
+  RESPONDENT
+  WITNESS
+}
+
+enum HearingOutcome {
+  SETTLED
+  FAILED
+  POSTPONED
+  PENDING
+  NO_SHOW
+}
+
+enum SettlementType {
+  AMICABLE
+  ARBITRATION_AWARD
+  REFERRED_TO_LUPONG_TAGAPAMAYAPA
+  REFERRED_TO_COURT
+  DISMISSED
+}
+
+enum BlotterDocumentType {
+  SWORN_STATEMENT
+  SUMMONS
+  NOTICE_OF_HEARING
+  CERTIFICATE_TO_FILE_ACTION
+  SETTLEMENT_AGREEMENT
+  PHOTO_EVIDENCE
+  OTHER
 }

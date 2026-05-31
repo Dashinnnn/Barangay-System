@@ -1,5 +1,7 @@
 import { ResidentService } from "../services/residentService";
 import { Request, Response } from "express";
+import { createResidentSchema } from "../validations/residentValidation";
+import { validate } from '../middleware/validate';
 
 export class ResidentController {
     private residentService: ResidentService;
@@ -8,20 +10,23 @@ export class ResidentController {
         this.residentService = new ResidentService();
     }
 
-    create = async (req: Request, res: Response) => {
-        try {
-            const resident = await this.residentService.createResident(req.body);
-            res.status(201).json({
-                success: true,
-                data: resident
-            });
-        } catch (error: any) {
-            res.status(400).json({
-                success: false,
-                message: error.message
-            });
+    create = [
+        validate(createResidentSchema), 
+        async (req: Request, res: Response) => {
+            try {
+                const resident = await this.residentService.createResident(req.body);
+                res.status(201).json({
+                    success: true,
+                    data: resident
+                });
+            } catch (error: any) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
         }
-    };
+    ]
 
     getAll = async (req: Request, res: Response) => {
         try {

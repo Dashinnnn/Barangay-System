@@ -17,3 +17,7 @@ export const createResidentSchema = z.object({
     voterStatus: z.boolean().optional().default(false),
     isHouseholdHead: z.boolean().optional().default(false),
 });
+
+export const updateResidentSchema = z.object({
+    
+})

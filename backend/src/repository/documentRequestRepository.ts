@@ -1,4 +1,5 @@
 import { includes } from 'zod';
+import { RequestStatus } from '@prisma/client';
 import prisma from '../config/database';
 
 export class DocumentRequestRepository {
@@ -32,7 +33,7 @@ export class DocumentRequestRepository {
 
     async findAll(status?: string) {
         return prisma.documentRequest.findMany({
-            where: status ? { status } : {},
+            where: status ? { status: status as RequestStatus } : {},
             include: {
                 resident: {
                     select: {
