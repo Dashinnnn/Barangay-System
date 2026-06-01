@@ -6,24 +6,28 @@ datasource db {
   provider = "postgresql"
 }
 
+// ==================== USERS & ROLES ====================
 model User {
-  id                String         @id @default(cuid())
-  email             String         @unique
-  password          String
-  firstName         String
-  lastName          String
-  filedCases        BlotterCase[]   @relation("FiledBy")
-  assignedCases     BlotterCase[]   @relation("AssignedTo")
-  hearingsLed       Hearing[]
-  caseLogs          CaseLog[]
-  role              Role            @default(STAFF)
-  isActive          Boolean         @default(true)
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id            String        @id @default(cuid())
+  email         String        @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          Role          @default(STAFF)
+  isActive      Boolean       @default(true)
+  
+  filedCases    BlotterCase[] @relation("FiledBy")
+  assignedCases BlotterCase[] @relation("AssignedTo")
+  hearingsLed   Hearing[]
+  caseLogs      CaseLog[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@map("users")
 }
 
+// ==================== BARANGAY STRUCTURE ====================
 model Purok {
   id            String     @id @default(cuid())
   name          String     @unique
@@ -39,194 +43,201 @@ model Purok {
   @@map("puroks")
 }
 
+// ==================== RESIDENTS ====================
 model Resident {
-  id                String            @id @default(cuid())
-  firstName         String
-  middleName        String?
-  lastName          String
-  suffix            String?
-  dateOfBirth       DateTime
-  gender            Gender
-  civilStatus       CivilStatus
-  occupation        String?
-  contactNumber     String?
-  email             String?
+  id              String            @id @default(cuid())
+  firstName       String
+  middleName      String?
+  lastName        String
+  suffix          String?
+  dateOfBirth     DateTime
+  gender          Gender
+  civilStatus     CivilStatus
+  occupation      String?
+  contactNumber   String?
+  email           String?
+  houseNumber     String?
+  street          String?
+  
+  purokId         String
+  purok           Purok             @relation(fields: [purokId], references: [id])
 
-  purokId           String
-  purok             Purok             @relation(fields: [purokId], references: [id])
+  voterStatus     Boolean           @default(false)
+  isHouseholdHead Boolean           @default(false)
 
-  documentRequests  DocumentRequest[]
+  documentRequests DocumentRequest[]
+  caseParties      CaseParty[]
 
-  caseParties       CaseParty[]
-
-  houseNumber       String?
-  street            String?
-
-  voterStatus       Boolean           @default(false)
-  isHouseholdHead   Boolean           @default(false)
-
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@map("residents")
 }
 
+// ==================== DOCUMENT REQUESTS ====================
 model DocumentRequest {
-  id              String         @id @default(cuid())
-  residentId      String
-  resident        Resident       @relation(fields: [residentId], references: [id])
+  id           String        @id @default(cuid())
+  residentId   String
+  resident     Resident      @relation(fields: [residentId], references: [id])
 
-  documentType    DocumentType
-  purpose         String
-  status          RequestStatus  @default(PENDING)
-  
-  requestedAt     DateTime       @default(now())
-  reviewedAt      DateTime?
-  releasedAt      DateTime?
-  
-  reviewedBy      String?
-  notes           String?
+  documentType DocumentType
+  purpose      String
+  status       RequestStatus @default(PENDING)
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  requestedAt  DateTime      @default(now())
+  reviewedAt   DateTime?
+  releasedAt   DateTime?
+
+  reviewedBy   String?       // User ID (optional reference)
+  notes        String?
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   @@map("document_requests")
 }
 
+// ==================== BLOTTER / KATARUNGANG PAMBARANGAY ====================
 model BlotterCase {
-  id                    String            @id @default(cuid())
-  caseNumber            String            @unique
-  title                 String
-  inceidentType         inceidentType
-  status                CaseStatus        @default(FILED)
-  priority              Priority          @default(NORMAL)
+  id              String        @id @default(cuid())
+  caseNumber      String        @unique
+  title           String
+  incidentType    IncidentType
+  status          CaseStatus    @default(FILED)
+  priority        Priority      @default(NORMAL)
 
-  incidentDate          DateTime
-  incidentTime          String?
-  incidentPlace         String
+  incidentDate    DateTime
+  incidentTime    String?
+  incidentPlace   String
+  summary         String        @db.Text
+  remarks         String?       @db.Text
 
-  summary               String            @db.Text
-  remarks               String?           @db.Text
+  // Parties
+  complaints      CaseParty[]   @relation("Complaints")
+  respondents     CaseParty[]   @relation("Respondents")
+  witnesses       CaseParty[]   @relation("Witnesses")
 
-  complaints            CaseParty[]       @relation("Complaints")
-  respondents           CaseParty[]       @relation("Respondents")
-  witnesses             CaseParty[]       @relation("Witnesses")
+  hearings        Hearing[]
+  settlements     Settlement[]
+  documents       BlotterDocument[]
+  logs            CaseLog[]
 
-  hearings              Hearing[]
-  settlemets            Settlement[]
-  documents             BlotterDocument[]
-  logs                  CaseLog[]
+  // Tracking
+  filedById       String
+  filedBy         User          @relation("FiledBy", fields: [filedById], references: [id])
+  
+  assignedToId    String?
+  assignedTo      User?         @relation("AssignedTo", fields: [assignedToId], references: [id])
 
-  filedById             String
-  filedBy               User               @relation("FiledBy", fields: [filedById], references: [id])
-
-  assignedToId          String? 
-  assignedTo            User?              @relation("AssignedTo", fields: [assignedToId], references: [id])
-
-
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@map("blotter_cases")
 }
 
 model CaseParty {
-  id                    String              @id @default(cuid())
-  role                  PartyRole
+  id            String      @id @default(cuid())
 
-  residentId            String? 
-  resident              Resident?           @relation(fields: [residentId], references: [id])
+  role          PartyRole
 
-  firstName             String
-  middleName            String?
-  lastName              String
-  suffix                String?
-  address               String
-  contactNumber         String?
-  age                   Int? 
-  gender                Gender?
-  civilStatus           CivilStatus?
-  occupation            String?
+  // If registered resident
+  residentId    String?
+  resident      Resident?   @relation(fields: [residentId], references: [id])
 
-  statement             String?             @db.Text
+  // For walk-ins / non-residents
+  firstName     String
+  middleName    String?
+  lastName      String
+  suffix        String?
+  address       String
+  contactNumber String?
+  age           Int?
+  gender        Gender?
+  civilStatus   CivilStatus?
+  occupation    String?
 
-  complainantCaseId     String?
-  complainantCase       BlotterCase?        @relation("Complaints", fields: [complainantCaseId], references: [id])
+  statement     String?     @db.Text
 
-  respondentCaseId      String?
-  respondentCase        BlotterCase?        @relation("Respondents", fields: [respondentCaseId], references: [id])
+  // Relations to case
+  complainantCaseId String?
+  complainantCase   BlotterCase? @relation("Complaints", fields: [complainantCaseId], references: [id])
 
-  witnessCaseId         String?
-  winessCase            BlotterCase?        @relation("Witnesses", fields: [witnessCaseId], references: [id])
+  respondentCaseId  String?
+  respondentCase    BlotterCase? @relation("Respondents", fields: [respondentCaseId], references: [id])
 
-  createdAt             DateTime            @default(now())
-  
+  witnessCaseId     String?
+  witnessCase       BlotterCase? @relation("Witnesses", fields: [witnessCaseId], references: [id])
+
+  createdAt     DateTime    @default(now())
+
   @@map("case_parties")
 }
 
 model Hearing {
-  id                    String              @id @default(cuid())
-  caseId                String
-  case                  BlotterCase         @relation(fields: [caseId], references: [id])
+  id            String         @id @default(cuid())
+  caseId        String
+  case          BlotterCase    @relation(fields: [caseId], references: [id])
 
-  hearingNumber         Int
-  scheduledDate         DateTime
-  actualDate            DateTime?
-  venue                 String?
-  outcome               HearingOutcome?
-  notes                 String?             @db.Text
+  hearingNumber Int
+  scheduledDate DateTime
+  actualDate    DateTime?
+  venue         String?
+  outcome       HearingOutcome?
+  notes         String?        @db.Text
 
-  conductedById         String
-  conductedBy           User                @relation(fields: [conductedById], references: [id])
+  conductedById String
+  conductedBy   User           @relation(fields: [conductedById], references: [id])
 
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
-  @@map(hearings)
+  @@map("hearings")
 }
 
-modal Settlement {
-  id                    String              @id @default(cuid())
-  caseId                String
-  case                  BlotterCase         @relation(fields: [caseId], references: [id])
+model Settlement {
+  id             String         @id @default(cuid())
+  caseId         String
+  case           BlotterCase    @relation(fields: [caseId], references: [id])
 
-  settlemetDate         DateTime
-  type                  SettlementType
-  terms                 String              @db.Text
-  isSigned              Boolean             @default(false)
+  settlementDate DateTime
+  type           SettlementType
+  terms          String         @db.Text
+  isSigned       Boolean        @default(false)
 
-  createAt              DateTime            @default(now())
+  createdAt      DateTime       @default(now())
 
   @@map("settlements")
 }
 
 model BlotterDocument {
-  id                    String              @id @default(cuid())
-  caseId                String
-  case BlotterCase                          @relation(fields: [caseId], references: [id])
+  id         String             @id @default(cuid())
+  caseId     String
+  case       BlotterCase        @relation(fields: [caseId], references: [id])
 
-  type                  BlotterDocumentType
-  fileName              String
-  filePath              String
+  type       BlotterDocumentType
+  fileName   String
+  filePath   String
 
-  uploadedAt            DateTime            @default(now())
+  uploadedAt DateTime           @default(now())
 
   @@map("blotter_documents")
 }
 
-model CaseLog{
-  id                    String              @id @default(cuid())
-  caseId                String
-  case                  BlotterCase         @relation(fields: [caseId], references: [id])
+model CaseLog {
+  id           String      @id @default(cuid())
+  caseId       String
+  case         BlotterCase @relation(fields: [caseId], references: [id])
 
-  action                String
-  performedById         String
-  performedBy           User                 @relation(fields: [performedById], refences: [id])
-  performedAt           DateTime             @default(now())
+  action       String
+  performedById String
+  performedBy  User        @relation(fields: [performedById], references: [id])
+
+  performedAt  DateTime    @default(now())
 
   @@map("case_logs")
 }
 
+// ==================== ENUMS ====================
 enum Role {
   ADMIN
   CAPTAIN

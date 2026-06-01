@@ -6,6 +6,7 @@ import morgan from 'morgan';
 
 import authRoutes from './routes/authRoutes';
 import residentRoutes from './routes/residentRoutes';
+import blotterRoutes from './routes/blotterRoutes';
 import purokRoutes from './routes/residentRoutes';
 import documentRequestRoutes from './routes/documentRequestRoutes'
 import prisma from './config/database';   
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/residents', residentRoutes);
 app.use('/api/puroks', purokRoutes);
+app.use('/api/blotter', blotterRoutes)
 app.use('/api/document-requests', documentRequestRoutes);
 
 // Test Route
