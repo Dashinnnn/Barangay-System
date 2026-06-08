@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { DocumentRequestService } from '../services/documentRequestService';
 import { createDocumentRequestSchema, updateDocumentRequestSchema } from '../validations/documentRequestValidation';
 import { validate } from '../middleware/validate';
+import { success } from 'zod';
+import { pdfService } from '../services/pdfService';
 
 
 export class DocumentRequestController {
@@ -116,4 +118,43 @@ export class DocumentRequestController {
             });
         }
     }
+
+    generatePdf = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            //Ensure id is typeof string
+            if (typeof id !== 'string' || id) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid ID Format'
+                });
+                return;
+            }
+            const request = await this.docService.getRequestById(id);
+
+            if (request.status !== 'APPROVED') {
+                res.status(400).json({
+                    success: false,
+                    message: 'Document must be approved before generating PDF'
+                });
+                return;
+            }
+
+            const pdfBytes = await pdfService.generateBarangayClearance({
+                resident: request.resident,
+                purpose: request.purpose,
+                requestId: request.id,
+                issuedBy: req.user?.email || 'Barangay Staff'
+            });
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=Barangay-Clearance-${request.id}.pdf`);
+            res.send(pdfBytes);
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    };
 }

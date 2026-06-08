@@ -38,4 +38,10 @@ router.delete(
     docController.delete
 );
 
+router.get(
+    '/id/generate-pdf', 
+    authenticateJWT,
+    docController.generatePdf
+);
+
 export default router;

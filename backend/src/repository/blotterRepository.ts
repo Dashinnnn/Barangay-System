@@ -15,8 +15,14 @@ export class BlotterRepository {
     }
 
     async findAll(status?: string) {
+        const where: any = {};
+
+        if (status) {
+            where.status = status;
+        }
+
         return prisma.blotterCase.findMany({
-            where: status ? { status } : {},
+            where,
             include: {
                 complaints: true,
                 respondents: true,

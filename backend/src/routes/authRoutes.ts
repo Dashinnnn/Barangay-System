@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { Authcontroller } from '../controllers/authController';
+import { AuthController } from '../controllers/authController';
 import { authenticateJWT, authorizeRoles } from '../middleware/authMiddleware';
 import { loginSchema, registerSchema } from '../validations/authValidations';
 import { validate } from '../middleware/validate';
 const router = Router();
-const authController = new Authcontroller();
+const authController = new AuthController();
 
 //Public routes (no authentication needed)
 router.post(
