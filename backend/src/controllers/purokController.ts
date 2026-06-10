@@ -3,10 +3,10 @@ import { PurokService } from '../services/purokService';
 import { createPurokSchema, updatePurokSchema } from '../validations/purokValidations';
 import { validate } from '../middleware/validate';
 
-export class PurokController { 
+export class PurokController {
     private purokService = new PurokService();
 
-    create = [ 
+    create = [
         validate(createPurokSchema),
         async (req: Request, res: Response) => {
             try {
@@ -17,7 +17,7 @@ export class PurokController {
                 });
             } catch (error: any) {
                 res.status(400).json({
-                    success: false, 
+                    success: false,
                     message: error.message
                 });
             }
@@ -27,34 +27,34 @@ export class PurokController {
     getAll = async (req: Request, res: Response) => {
         try {
             const puroks = await this.purokService.getAllPuroks();
-            res.json({ 
+            res.json({
                 success: true,
                 data: puroks
-             });
+            });
         } catch (error: any) {
             res.status(500).json({
                 success: false,
                 message: error.message
             });
         }
-    }
+    };
 
     getById = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
 
-            //Ensue id is a string
-            if (typeof id !== 'string') {
-                res.status(400).json ({
+            if (typeof id !== 'string' || !id) {
+                res.status(400).json({
                     success: false,
                     message: 'Invalid ID format'
                 });
                 return;
             }
+
             const purok = await this.purokService.getPurokById(id);
-            res.json ({ 
-                success: true, 
-                data: purok 
+            res.json({
+                success: true,
+                data: purok
             });
         } catch (error: any) {
             res.status(404).json({
@@ -62,20 +62,19 @@ export class PurokController {
                 message: error.message
             });
         }
-    }
+    };
 
     update = [
-        validate(updatePurokSchema), 
+        validate(updatePurokSchema),
         async (req: Request, res: Response) => {
             try {
                 const { id } = req.params;
 
-                //Ensure that id is a string
-                if (typeof id !== 'string' || id) {
+                if (typeof id !== 'string' || !id) {
                     res.status(400).json({
                         success: false,
                         message: 'Invalid ID format'
-                    })
+                    });
                     return;
                 }
 
@@ -91,30 +90,30 @@ export class PurokController {
                 });
             }
         }
-    ] 
+    ];
 
     delete = async (req: Request, res: Response) => {
-        try{
+        try {
             const { id } = req.params;
 
-            //Ensure that id is a string
-            if (typeof id !== 'string' || id) {
+            if (typeof id !== 'string' || !id) {
                 res.status(400).json({
                     success: false,
-                    message: 'invalid ID format'  
-                })
-                return
+                    message: 'Invalid ID format'
+                });
+                return;
             }
-             await this.purokService.deletePurok(id);
-             res.json({
+
+            await this.purokService.deletePurok(id);
+            res.json({
                 success: true,
                 message: 'Purok deleted successfully'
-             });
+            });
         } catch (error: any) {
             res.status(400).json({
                 success: false,
                 message: error.message
             });
         }
-    }
- }
+    };
+}

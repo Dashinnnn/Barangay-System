@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createDocumentRequestSchema = z.object({
     residentId: z.string().min(1, "Resident ID is required"),
 
-    documentTpye: z.enum([
+    documentType: z.enum([
         "BARANGAY_CLEARANCE",
         "CERTIFICATE_OF_RESIDENCY",
         "CERTIFICATE_OF_INDIGENCY",

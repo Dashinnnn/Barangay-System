@@ -14,12 +14,12 @@ router.post(
     validate(createResidentSchema),
     residentController.create
 );
-router.post(
+router.get(
     '/', 
     authenticateJWT, 
     residentController.getAll
 );
-router.post(
+router.get(
     '/:id', 
     authenticateJWT, 
     residentController.getById

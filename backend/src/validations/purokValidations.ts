@@ -14,7 +14,7 @@ export const createPurokSchema = z.object({
     .optional(),
     
     contactNumber: z.string()
-    .regex(/^(\+63|0)?\d{10}$/, "Invalid Philippine phone number")
+    .regex(/^(\+63|0)?[\s-]?(\d{10}|\d{3}[\s-]?\d{3}[\s-]?\d{4})$/, "Invalid Philippine phone number")
     .optional()
 });
 

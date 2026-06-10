@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import authRoutes from './routes/authRoutes';
 import residentRoutes from './routes/residentRoutes';
 import blotterRoutes from './routes/blotterRoutes';
-import purokRoutes from './routes/residentRoutes';
+import purokRoutes from './routes/purokRoutes';
 import documentRequestRoutes from './routes/documentRequestRoutes'
 import prisma from './config/database';   
 
