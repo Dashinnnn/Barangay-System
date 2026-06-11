@@ -46,7 +46,7 @@ export class ResidentController {
             const { id } = req.params;
 
             //Ensure id is a string
-            if (typeof id !== 'string') {
+            if (typeof id !== 'string' || !id) {
                 res.status(400).json({
                     success: false,
                     message: 'Invalid ID format'
@@ -71,7 +71,7 @@ export class ResidentController {
             const { id } = req.params;
 
             //Ensure id is a string
-            if (typeof id !== 'string') {
+            if (typeof id !== 'string' || !id) {
                 res.status(400).json({
                     success: false,
                     message: 'Invalid ID format'
@@ -96,7 +96,7 @@ export class ResidentController {
             const { id } = req.params;
 
             //Ensure id is a string
-            if (typeof id !== 'string') {
+            if (typeof id !== 'string' || !id) {
                 res.status(400).json({
                     success: false,
                     message: 'Invalid ID format'

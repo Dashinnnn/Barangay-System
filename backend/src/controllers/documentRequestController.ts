@@ -47,7 +47,7 @@ export class DocumentRequestController {
             const { id } = req.params
 
             //Ensure id is a string
-            if (typeof id !== 'string' || id) {
+            if (typeof id !== 'string' || !id) {
                 res.status(400).json({
                     success: false,
                     message: 'Invalid ID format'

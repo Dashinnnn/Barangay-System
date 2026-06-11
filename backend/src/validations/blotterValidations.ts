@@ -22,7 +22,7 @@ export const createBlotterCaseSchema = z.object({
     remarks: z.string().optional(),
 
     complainants: z.array(z.string()).min(1, "At least one complainant is required"),
-    respondetns: z.array(z.string()).min(1, "At least 1 respondent is required"),
+    respondents: z.array(z.string()).min(1, "At least 1 respondent is required"),
     witnesses: z.array(z.string()).optional().default([]),
 
     filedById: z.string().min(1),

@@ -45,7 +45,7 @@ export class BlotterController {
         try {
             const { id } = req.params;
             //Ensure the typeof id is string || id
-            if (typeof id !== 'string' || id) {
+            if (typeof id !== 'string' || !id) {
                 res.status(400).json({
                     success: false,
                     message: 'Invalid ID format'
@@ -71,7 +71,7 @@ export class BlotterController {
             try {
                 const { id } = req.params;
                 //Ensure typeof id is string || id
-                if(typeof id !== 'string' || id) {
+                if(typeof id !== 'string' || !id) {
                     res.status(400).json({
                         success: false,
                         message: 'Invalid ID format'
@@ -96,7 +96,7 @@ export class BlotterController {
         try {
             const { id } = req.params;
             //Ensure typeof id is string || id
-            if(typeof id !== 'string' || id) {
+            if(typeof id !== 'string' || !id) {
                 res.status(400).json({
                     success:false,
                     message: 'Invalid ID format'
